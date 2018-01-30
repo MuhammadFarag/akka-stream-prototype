@@ -25,13 +25,13 @@ class HelloStreamTest extends TestKit(ActorSystem("test-system")) with FunSuiteL
   }
 
   test("framing an incoming ByteString into its components") {
-    val frame: Flow[ByteString, String, NotUsed] = Framing
+    val split: Flow[ByteString, String, NotUsed] = Framing
       .delimiter(ByteString(","), 3, allowTruncation = true)
       .map(_.decodeString("UTF8"))
 
-    val byteString = ByteString("h,e,l,l,o")
-    val source: Source[ByteString, NotUsed] = Source.single(byteString)
-    val materializedResult: Future[Seq[String]] = source.take(1).via(frame).runWith(Sink.seq)
+    val sourceString = ByteString("h,e,l,l,o")
+    val source: Source[ByteString, NotUsed] = Source.single(sourceString)
+    val materializedResult: Future[Seq[String]] = source.via(split).runWith(Sink.seq)
     whenReady(materializedResult) { result =>
       result shouldBe Seq("h", "e", "l", "l", "o")
     }
@@ -39,18 +39,18 @@ class HelloStreamTest extends TestKit(ActorSystem("test-system")) with FunSuiteL
 
   }
 
-  test("Framing an incoming ByteString around new lines"){
-    val byteString = ByteString(
+  test("Framing an incoming ByteString around new lines") {
+    val sourceString = ByteString(
       """Hello
         |World!""".stripMargin)
 
-    val frame: Flow[ByteString, String, NotUsed] = Framing
+    val splitLines: Flow[ByteString, String, NotUsed] = Framing
       .delimiter(ByteString("\n"), 20, allowTruncation = true)
       .map(_.decodeString("UTF8"))
 
 
-    val materializedResult2 = Source.single(byteString).via(frame).runWith(Sink.seq)
-    whenReady(materializedResult2){ result =>
+    val lines: Future[Seq[String]] = Source.single(sourceString).via(splitLines).runWith(Sink.seq)
+    whenReady(lines) { result =>
 
       result shouldBe Seq("Hello", "World!")
 
