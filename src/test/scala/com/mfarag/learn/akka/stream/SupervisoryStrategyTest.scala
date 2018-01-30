@@ -84,4 +84,20 @@ class SupervisoryStrategyTest extends TestKit(ActorSystem("test-system")) with F
     }
   }
 
+  test("Resume a graph when a specific Exception is thrown") {
+    val decider: Supervision.Decider = {
+      case _: NumberFormatException => Supervision.Resume
+    }
+    implicit val materializer: ActorMaterializer =
+      ActorMaterializer(
+        ActorMaterializerSettings(system)
+          .withSupervisionStrategy(decider)
+      )
+
+    whenReady(graph(parse).run) { result =>
+      result shouldBe Seq(1, 2, 4)
+    }
+  }
+
+
 }
