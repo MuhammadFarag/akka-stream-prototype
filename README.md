@@ -1,0 +1,1 @@
+Following examples in [Akka in Action](https://www.manning.com/books/akka-in-action) book.
