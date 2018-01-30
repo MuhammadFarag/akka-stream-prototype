@@ -3,7 +3,7 @@ package com.mfarag.learn.akka.stream
 import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.{Flow, Framing, Keep, RunnableGraph, Sink, Source}
-import akka.stream.{ActorAttributes, ActorMaterializer, Supervision}
+import akka.stream.{ActorAttributes, ActorMaterializer, ActorMaterializerSettings, Supervision}
 import akka.testkit.TestKit
 import akka.util.ByteString
 import org.scalatest.concurrent.ScalaFutures
@@ -54,5 +54,20 @@ class SupervisoryStrategyTest extends TestKit(ActorSystem("test-system")) with F
       result shouldBe Seq(1, 2, 4)
     }
   }
+
+  test("Stop a flow when a specific Exception is thrown") {
+    val decider: Supervision.Decider = {
+      case _: NumberFormatException => Supervision.Stop
+    }
+
+    whenReady(
+      graph(
+        parse
+          .withAttributes(ActorAttributes.supervisionStrategy(decider)))
+        .run.failed) { exception =>
+      exception shouldBe a[NumberFormatException]
+    }
+  }
+
 
 }
