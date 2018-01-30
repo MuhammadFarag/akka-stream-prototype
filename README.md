@@ -1,7 +1,4 @@
-Following examples in [Akka in Action](https://www.manning.com/books/akka-in-action) book.
-
-
-________
+Learning how to use and test Akka Streams
 
 ### Resources
 * [Akka in Action](https://www.manning.com/books/akka-in-action)
