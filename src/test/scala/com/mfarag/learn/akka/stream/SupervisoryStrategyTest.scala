@@ -41,4 +41,18 @@ class SupervisoryStrategyTest extends TestKit(ActorSystem("test-system")) with F
     }
   }
 
+  test("Restart a flow when a specific Exception is thrown") {
+    val decider: Supervision.Decider = {
+      case _: NumberFormatException => Supervision.Restart
+    }
+
+    whenReady(
+      graph(
+        parse
+          .withAttributes(ActorAttributes.supervisionStrategy(decider)))
+        .run) { result =>
+      result shouldBe Seq(1, 2, 4)
+    }
+  }
+
 }
