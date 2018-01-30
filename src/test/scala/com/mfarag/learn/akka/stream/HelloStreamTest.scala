@@ -3,7 +3,7 @@ package com.mfarag.learn.akka.stream
 import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{Flow, Framing, Sink, Source}
+import akka.stream.scaladsl.{Flow, Framing, Keep, RunnableGraph, Sink, Source}
 import akka.testkit.TestKit
 import akka.util.ByteString
 import org.scalatest._
@@ -66,7 +66,13 @@ class HelloStreamTest extends TestKit(ActorSystem("test-system")) with FunSuiteL
 
     val parse: Flow[String, Int, NotUsed] = Flow[String].map(_.toInt)
 
-    val integers: Future[Seq[Int]] = Source.single(sourceString).via(split).via(parse).runWith(Sink.seq)
+    val graph: RunnableGraph[Future[Seq[Int]]] =
+      Source.single(sourceString)
+        .via(split)
+        .via(parse)
+        .toMat(Sink.seq)(Keep.right)
+
+    val integers: Future[Seq[Int]] = graph.run()
     whenReady(integers) { result =>
       result shouldBe Seq(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
     }
