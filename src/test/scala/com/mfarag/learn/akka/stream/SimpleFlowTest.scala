@@ -11,7 +11,7 @@ import org.scalatest.concurrent.ScalaFutures
 
 import scala.concurrent.Future
 
-class HelloStreamTest extends TestKit(ActorSystem("test-system")) with FunSuiteLike with StopSystemAfterAll with Matchers with ScalaFutures {
+class SimpleFlowTest extends TestKit(ActorSystem("test-system")) with FunSuiteLike with StopSystemAfterAll with Matchers with ScalaFutures {
 
   implicit val materializer: ActorMaterializer = ActorMaterializer()
 
