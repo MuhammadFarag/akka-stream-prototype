@@ -39,6 +39,24 @@ class HelloStreamTest extends TestKit(ActorSystem("test-system")) with FunSuiteL
 
   }
 
+  test("Framing an incoming ByteString around new lines"){
+    val byteString = ByteString(
+      """Hello
+        |World!""".stripMargin)
+
+    val frame: Flow[ByteString, String, NotUsed] = Framing
+      .delimiter(ByteString("\n"), 20, allowTruncation = true)
+      .map(_.decodeString("UTF8"))
+
+
+    val materializedResult2 = Source.single(byteString).via(frame).runWith(Sink.seq)
+    whenReady(materializedResult2){ result =>
+
+      result shouldBe Seq("Hello", "World!")
+
+    }
+  }
+
 }
 
 
