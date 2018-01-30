@@ -57,6 +57,22 @@ class HelloStreamTest extends TestKit(ActorSystem("test-system")) with FunSuiteL
     }
   }
 
+  test("Split and parse a ByteString of comma separated integers") {
+    val sourceString = ByteString("1,2,3,4,5,6,7,8,9,10")
+
+    val split: Flow[ByteString, String, NotUsed] = Framing
+      .delimiter(ByteString(","), 20, allowTruncation = true)
+      .map(_.decodeString("UTF8"))
+
+    val parse: Flow[String, Int, NotUsed] = Flow[String].map(_.toInt)
+
+    val integers: Future[Seq[Int]] = Source.single(sourceString).via(split).via(parse).runWith(Sink.seq)
+    whenReady(integers) { result =>
+      result shouldBe Seq(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+    }
+
+  }
+
 }
 
 
